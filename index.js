@@ -1,9 +1,10 @@
 import express from "express";
 import { MongoClient } from "mongodb";
-import * as dotenv from 'dotenv';
+import * as dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+app.use(express.json())
 const PORT = 4000;
 const client = new MongoClient(process.env.URL); //dial
 await client.connect(); //call
@@ -108,7 +109,9 @@ app.get("/characters", async function (request, response) {
     .collection("characters")
     .find({})
     .toArray();
-  character ? response.send(character) : response.send({ Message: "No characters" });
+  character
+    ? response.send(character)
+    : response.send({ Message: "No characters" });
 });
 
 app.get("/characters/:id", async function (request, response) {
@@ -122,7 +125,23 @@ app.get("/characters/:id", async function (request, response) {
     : response.status(404).send({ message: "Character not found" });
 });
 
-app.post("/characters", express.json() , async function (request, response) {
+app.put(
+  "/updateCharacters/:id",
+  async function (request, response) {
+    const data = request.body;
+    const { id } = request.params;
+    const result = await client
+      .db("naruto")
+      .collection("characters")
+      .updateOne({ id: id }, { $set: data });
+      // response.send(result)
+    result
+      ? response.send({Message : "Update Successfully"})
+      : response.status(404).send({ message: "Character not found" });
+  }
+);
+
+app.post("/characters", async function (request, response) {
   const data = request.body;
   const result = await client
     .db("naruto")
@@ -139,10 +158,8 @@ app.delete("/charactersDelete/:id", async function (request, response) {
     .collection("characters")
     .deleteOne({ id: id });
   movie
-    ? response.send({Message : "Successfully Deleted"})
+    ? response.send({ Message: "Successfully Deleted" })
     : response.status(404).send({ message: "Character not found" });
 });
 
 app.listen(PORT, () => console.log(`The server started in: ${PORT} ✨✨`));
-
-
