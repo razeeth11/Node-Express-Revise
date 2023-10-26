@@ -102,34 +102,45 @@ app.get("/", function (request, response) {
   response.send("🙋‍♂️, 🎊✨🤩");
 });
 
-app.get("/movies", async function (request, response) {
-  const movie = await client
-    .db("spotify")
-    .collection("weeknd")
+app.get("/characters", async function (request, response) {
+  const character = await client
+    .db("naruto")
+    .collection("characters")
     .find({})
     .toArray();
-  movie ? response.send(movie) : response.send({ Message: "No Movies" });
+  character ? response.send(character) : response.send({ Message: "No characters" });
 });
 
-app.get("/movies/:id", async function (request, response) {
+app.get("/characters/:id", async function (request, response) {
   const { id } = request.params;
-  const movie = await client
-    .db("spotify")
-    .collection("weeknd")
+  const character = await client
+    .db("naruto")
+    .collection("characters")
     .findOne({ id: id });
-  movie
-    ? response.send(movie)
-    : response.status(404).send({ message: "Movie not found" });
+  character
+    ? response.send(character)
+    : response.status(404).send({ message: "Character not found" });
 });
 
-app.post("/movies", express.json() , async function (request, response) {
+app.post("/characters", express.json() , async function (request, response) {
   const data = request.body;
   const result = await client
-    .db("spotify")
-    .collection("weeknd")
+    .db("naruto")
+    .collection("characters")
     .insertMany(data);
 
   response.send(result);
+});
+
+app.delete("/charactersDelete/:id", async function (request, response) {
+  const { id } = request.params;
+  const movie = await client
+    .db("naruto")
+    .collection("characters")
+    .deleteOne({ id: id });
+  movie
+    ? response.send({Message : "Successfully Deleted"})
+    : response.status(404).send({ message: "Character not found" });
 });
 
 app.listen(PORT, () => console.log(`The server started in: ${PORT} ✨✨`));
